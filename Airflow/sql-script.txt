@@ -1,0 +1,114 @@
+# script 3 last update
+use tooday
+CREATE TABLE trx (
+    nid INT,
+    dinsertion varchar(50),
+    nproductid INT,
+    namount DECIMAL(18, 2),
+    noperationfee DECIMAL(18, 2),
+    nshopid INT,
+    last_updated DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TABLE facturation (
+    nid INT ,
+    nshopid INT,
+    dinsertion varchar(50),
+    sbillerid INT,
+    namount DECIMAL(18, 2),
+    last_updated DATETIME2 DEFAULT GETDATE()
+);
+
+CREATE TRIGGER update_trx_last_updated
+ON trx
+AFTER UPDATE, INSERT
+AS
+BEGIN
+    UPDATE trx
+    SET last_updated = GETDATE()
+    WHERE nid IN (SELECT nid FROM inserted)
+END;
+
+CREATE TRIGGER update_facturation_last_updated
+ON facturation
+AFTER UPDATE, INSERT
+AS
+BEGIN
+    UPDATE facturation
+    SET last_updated = GETDATE()
+    WHERE nid IN (SELECT nid FROM inserted)
+END;
+use virement
+CREATE TABLE dest_trx (
+    nid bigINT,
+    dinsertion varchar(50),
+    nproductid bigINT,
+    namount float,
+    noperationfee float,
+    nshopid bigINT,
+    valid_from DATETIME,
+    valid_to DATETIME,
+    flag bigINT
+);
+
+CREATE TABLE dest_facturation (
+    nid bigINT,
+    nshopid bigINT,
+    dinsertion varchar(50),
+    sbillerid bigINT,
+    namount float,
+    valid_from DATETIME,
+    valid_to DATETIME,
+    flag BIgint
+);
+
+
+script 4
+
+use exemple
+
+CREATE TABLE trx (
+    nid INT,
+    dinsertion datetime,
+    nproductid INT,
+    namount DECIMAL(18, 2),
+    noperationfee DECIMAL(18, 2),
+    nshopid INT,
+    last_updated DATETIME DEFAULT GETDATE()
+);
+
+CREATE TABLE facturation (
+    nid INT,
+    nshopid INT,
+    dinsertion datetime,
+    sbillerid INT,
+    namount DECIMAL(18, 2),
+    last_updated DATETIME DEFAULT GETDATE()
+);
+
+----------------------------:
+use leetcode
+CREATE TABLE dest_trx (
+    nid int,
+    dinsertion DATETIME,
+    nproductid int,
+    namount DECIMAL(18, 2),
+    noperationfee DECIMAL(18, 2),
+    nshopid int,
+    valid_from DATETIME,
+    valid_to DATETIME,
+    flag int,
+    ChecksumColonne int
+);
+
+CREATE TABLE dest_facturation (
+    nid int,
+    nshopid int,
+    dinsertion datetime,
+    sbillerid int,
+    namount DECIMAL(18, 2),
+    valid_from DATETIME,
+    valid_to DATETIME,
+    flag int,
+    ChecksumColonne int
+);
