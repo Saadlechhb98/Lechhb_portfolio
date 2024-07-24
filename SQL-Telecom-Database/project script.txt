@@ -1,0 +1,151 @@
+#project script
+CREATE TABLE department (
+  DepartmentId int NOT NULL,
+  DepartmentName varchar(45) NOT NULL,
+  Salary int NOT NULL,
+  PRIMARY KEY (DepartmentId)
+);
+CREATE TABLE worklocation (
+  LocationId int NOT NULL,
+  LocationName varchar(45) NOT NULL,
+  NumberOfEmployees int NOT NULL,
+  PRIMARY KEY (LocationId)
+);
+
+CREATE TABLE employee (
+  EmployeeId int NOT NULL,
+  Employee_Name varchar(45) NOT NULL,
+  SSN varchar(20) NOT NULL,
+  Age int NOT NULL,
+  DepartmentId int DEFAULT NULL,
+  Salary int DEFAULT NULL,
+  PRIMARY KEY (EmployeeId),
+  CONSTRAINT FK_DepartmentId FOREIGN KEY (DepartmentId) REFERENCES department (DepartmentId)
+);
+
+CREATE TABLE employeeworklocation (
+  WorkEmployeeId int NOT NULL,
+  LocationId int NOT NULL,
+  CONSTRAINT FK_WorkEmployeeId FOREIGN KEY (WorkEmployeeId) REFERENCES employee (EmployeeId),
+  CONSTRAINT FK_LocationId FOREIGN KEY (LocationId) REFERENCES worklocation (LocationId)
+);
+
+CREATE TABLE salesperson (
+  SalesPersonId int NOT NULL,
+  IdEmployeeSalesPerson int NOT NULL,
+  PRIMARY KEY (SalesPersonId),
+  CONSTRAINT FK_SalesPerson_EmployeeId FOREIGN KEY (IdEmployeeSalesPerson) REFERENCES employee (EmployeeId)
+);
+
+CREATE TABLE customer (
+  CustomerId int NOT NULL,
+  CustomerName nvarchar(45) NOT NULL,
+  Sex char(1) NOT NULL,
+  Age int NOT NULL,
+  DateOfBirth date NOT NULL,
+  SocialSecurityNumber int NOT NULL,
+  CustomerSalesPersonId int NOT NULL,
+  PRIMARY KEY (CustomerId),
+  CONSTRAINT FK_CustomerSalesPersonId FOREIGN KEY (CustomerSalesPersonId) REFERENCES salesperson (SalesPersonId)
+);
+
+CREATE TABLE orders (
+  OrderId int NOT NULL,
+  OrderType varchar(45) NOT NULL,
+  OrderStatus varchar(45) NOT NULL,
+  OrderCustomerId int NOT NULL,
+  PRIMARY KEY (OrderId),
+  CONSTRAINT FK_OrderCustomerId FOREIGN KEY (OrderCustomerId) REFERENCES customer (CustomerId)
+);
+
+CREATE TABLE planinclusions (
+  PlanId int NOT NULL,
+  Data varchar(45) NOT NULL,
+  Talktime varchar(45) NOT NULL,
+  TextMessages varchar(45) NOT NULL,
+  PRIMARY KEY (PlanId)
+);
+
+CREATE TABLE plans (
+  PlansId int NOT NULL,
+  PlansType varchar(45) NOT NULL,
+  PlanName varchar(45) NOT NULL,
+  PlanInclusionId int NOT NULL,
+  PRIMARY KEY (PlansId),
+  CONSTRAINT FK_PlanInclusionId FOREIGN KEY (PlanInclusionId) REFERENCES planinclusions (PlanId)
+);
+
+CREATE TABLE billinginformation (
+  BillNumber int NOT NULL IDENTITY(1,1),
+  IncludedData int NOT NULL,
+  DataUsed int NOT NULL,
+  BalancedData int NOT NULL,
+  Tax decimal(18,2) NOT NULL,
+  PRIMARY KEY (BillNumber)
+);
+
+CREATE TABLE phonenumber (
+  AccountNumber int NOT NULL,
+  PhoneNumber bigint NOT NULL,
+  PhoneBillNumber int NOT NULL IDENTITY(1,1),
+  PRIMARY KEY (AccountNumber),
+  CONSTRAINT FK_PhoneBillNumber FOREIGN KEY (PhoneBillNumber) REFERENCES billinginformation (BillNumber)
+);
+
+CREATE TABLE callrecords (
+  CallId int NOT NULL IDENTITY(1,1),
+  CallStartTime time(6) NOT NULL,
+  CallEndTime time(6) NOT NULL,
+  CallDuration time(6) NOT NULL,
+  CallAccountNumber int NOT NULL,
+  PRIMARY KEY (CallId),
+  CONSTRAINT FK_CallAccountNumber FOREIGN KEY (CallAccountNumber) REFERENCES phonenumber (AccountNumber)
+);
+
+CREATE TABLE salary (
+  EmployeeId int NOT NULL,
+  EmployeeName varchar(45) NOT NULL,
+  DepartmentId int DEFAULT NULL,
+  Salary int NOT NULL,
+  PRIMARY KEY (EmployeeId),
+  CONSTRAINT FK_Salary_DepartmentId FOREIGN KEY (DepartmentId) REFERENCES department (DepartmentId)
+);
+
+CREATE TABLE simdata (
+  SimNumber bigint NOT NULL,
+  SimType varchar(45) NOT NULL,
+  SimCustomerId int NOT NULL,
+  SimAccountNumber int NOT NULL,
+  SimPlanNumber int DEFAULT NULL,
+  PRIMARY KEY (SimNumber),
+  CONSTRAINT FK_SimAccountNumber FOREIGN KEY (SimAccountNumber) REFERENCES phonenumber (AccountNumber),
+  CONSTRAINT FK_SimCustomerId FOREIGN KEY (SimCustomerId) REFERENCES customer (CustomerId),
+  CONSTRAINT FK_SimPlanNumber FOREIGN KEY (SimPlanNumber) REFERENCES plans (PlansId)
+);
+
+CREATE TABLE tracking (
+  TrackingId int NOT NULL,
+  TrackingStatus varchar(45) NOT NULL,
+  TrackingOrderId int NOT NULL,
+  PRIMARY KEY (TrackingId),
+  CONSTRAINT FK_TrackingOrderId FOREIGN KEY (TrackingOrderId) REFERENCES orders (OrderId)
+);
+
+INSERT INTO billinginformation VALUES (50,40,10,15.1),(100,60,40,20.3),(200,100,100,30.3),(500,200,300,40.3),(500,100,400,50),(1000,100,900,70),(800,300,500,60),(1200,400,800,100),(1500,400,1100,100),(1500,600,900,300),(1500,800,700,180),(2000,900,1100,180),(2000,500,1500,170),(2000,500,1500,200),(2000,1800,200,200);
+INSERT INTO planinclusions VALUES (1,'500MB','60 Minutes','100'),(2,'500MB','120 Minutes','200'),(3,'500MB','180 Minutes','300'),(4,'500MB','240 Minutes','400'),(5,'500MB','300 Minutes','500'),(6,'1GB','360 Minutes','600'),(7,'1GB','420 Minutes','700'),(8,'1GB','480 Minutes','800'),(9,'1GB','540 Minutes','900'),(10,'1GB','600 Minutes','1000'),(11,'1.5 GB','660 Minutes','1100'),(12,'1.5 GB','720 Minutes','1200'),(13,'1.5 GB','780 Minutes','1300'),(14,'1.5 GB','840 Minutes','1400'),(15,'1.5 GB','900 Minutes','1500'),(16,'2 GB','960 Minutes','Unlimited'),(17,'2 GB','1020 Minutes','Unlimited'),(18,'2 GB','1080 Minutes','Unlimited'),(19,'2 GB','1140 Minutes','Unlimited'),(20,'2 GB','1200 Minutes','Unlimited');
+INSERT INTO department VALUES (1,'Information Technology',10000),(2,'Sales & Marketing',5000),(3,'Finance',2500),(4,'Human Resource',7500),(5,'Customer Care',1000);
+INSERT INTO worklocation VALUES (1,'Seattle',5),(2,'Washington DC',5),(3,'New York',5),(4,'Boston',5);
+INSERT INTO plans VALUES (1,'Prepaid','Basic Plan',1),(2,'Prepaid','Every Minute Counts',2),(3,'Postpaid','Family',3),(4,'Postpaid','Enjoy Data',4),(5,'Postpaid','Finger tips',5),(6,'Prepaid','Talk For Hours',6),(7,'Postpaid','Do not disturb',7),(8,'Prepaid','Enjoy surfing',8),(9,'Prepaid','Continuous Texting',18),(10,'Postpaid','Powerful Speed',20);
+INSERT INTO employee VALUES (1,'Ojas Phansekar','123456789',24,1,1000),(2,'Shreyas Kalayanaraman','245987675',24,1,1000),(3,'Saurabh Kulkarni','734756953',24,1,1000),(4,'Vivek Shetye','572364526',26,1,1000),(5,'Mihir Patil','238745784',27,1,1000),(6,'Karan Thevar','968374657',28,4,7500),(7,'Chetan Mistry','623784983',30,4,7500),(8,'Shantanu Sawant','527473298',24,4,7500),(9,'Pooja Patil','286436778',24,4,7500),(10,'Kalpita Malvankar','863476236',34,4,7500),(11,'Vaibhav Parkar','123456789',24,2,5000),(12,'Sayali Sakhalkar','674378987',24,2,5000),(13,'Khushi Chavan','652134897',45,2,5000),(14,'Pratik Patre','677435432',24,2,5000),(15,'Pushkar','564321879',43,2,5000),(16,'Tushar Gupta','444777651',24,5,10000),(17,'Pranav Swaminathan','990077663',34,3,2500),(18,'Victor','563477778',44,3,2500),(19,'Yusuf Ozbek','995912563',45,3,2500),(20,'Sudharshan Poojary','763459876',24,3,2500),(21,'Parth Mehta','458787654',56,5,10000),(22,'Devdip Sen','458787654',56,5,10000),(23,'Devdip Sen','458787654',56,5,10000),(24,'Devdip Sen','458787654',56,5,10000),(26,'Devdip Sen','458787654',56,5,10000),(27,'Devdip Sen','458787654',56,5,10000),(28,'Alpana Sharan','987787654',45,3,2500),(29,'Priyanka Singh','238787654',43,3,2500),(30,'Ranjani Iyer','777787654',34,2,5000),(31,'Amlan Bhuyan','555787654',23,4,7500),(32,'Manoj Prabhakar','444787654',21,1,1000),(33,'Raj Phadke','999787654',56,5,10000),(34,'Priya Yadav','228787654',33,1,1000),(35,'Sayali Joshi','158787654',22,4,7500),(36,'Pranav Patil','658787654',25,5,10000),(37,'Rohit Patil','222787654',45,3,2500),(38,'Swanand Sapre','111787654',65,5,10000);
+INSERT INTO salesperson VALUES (1,5),(2,6),(3,7),(4,8);
+INSERT INTO customer VALUES (1,'Jishnu Vasudevan','M',24,'1993-12-28',232498675,1),(2,'Harsh Shah','M',24,'1993-09-12',456498675,2),(3,'Rachana Rambhad','F',24,'1993-08-19',543498675,3),(4,'Lagan Gupta','F',24,'1993-08-08',765498675,4),(5,'Neha Verma','F',24,'1993-08-27',987498675,1),(6,'Aniel Patel','M',24,'1993-11-28',235468675,2),(7,'Anubhav Gupta','M',27,'1990-12-28',555698675,3),(8,'Aditya Joshi','M',24,'1993-10-28',232434575,4),(9,'Parnal Dighe','F',24,'1993-09-28',232498765,1),(10,'Dharit Shah','M',24,'1993-12-27',123498675,2),(11,'Girish Sanai','M',24,'1993-07-22',645498675,3),(12,'Kal Bugrara','M',57,'1960-12-28',145498675,4),(13,'Neeraj Rajput','M',27,'1990-10-28',232555675,1),(14,'Shruti Mehta','F',26,'1991-12-17',232444375,2),(15,'Sameer Goel','M',28,'1989-12-30',276578675,3),(16,'Vijayshree Uppili','F',26,'1991-08-23',654498675,4),(17,'Rohit Kamble','M',24,'1993-06-28',453498675,1),(18,'Priyanka Desai','F',26,'1991-04-23',189498675,2),(19,'Komal Shirodkar','F',26,'1991-02-27',678498675,3),(20,'Simmah Kazi','F',22,'1995-12-28',232834675,4);
+INSERT INTO orders VALUES (1,'2 day shipping','Shipped',1),(2,'Priority Shipping','Partially Shipped',2),(3,'Standard','Payment Incomplete',3),(4,'2 day shipping','Order Cancelled',4),(5,'Standard','Pending',5),(6,'Priority Shipping','Refund Initiated',6),(7,'2 day shipping','Order Cancelled',7),(8,'Standard','Pending',8),(9,'Priority Shipping','Partially Shipped',9),(10,'2 day shipping','Shipped',10),(11,'Standard','Order Cancelled',11),(12,'Priority Shipping','Partially Shipped',12),(13,'2 day shipping','Payment Incomplete',13),(14,'Standard','Shipped',14),(15,'Priority Shipping','On The way',15),(16,'2 day shipping','Order Cancelled',16),(17,'Standard','Order Decilned',17),(18,'Priority Shipping','Refund Initiated',18),(19,'2 day shipping','Pending',19),(20,'Standard','On The way',20);
+INSERT INTO phonenumber VALUES (9,1235465768),(10,1235465768),(11,1675849305),(12,1345267859),(13,1578893409),(14,1876509876),(15,1657483948),(16,1236564789),(17,1784967348),(18,1758483934),(19,1745889839);
+
+INSERT INTO callrecords VALUES ('12:20:20.000000','12:21:20.000000','00:01:00.000000',10),('11:23:24.000000','15:40:30.000000','04:17:06.000000',10),('08:30:10.000000','08:32:20.000000','00:02:10.000000',11),('21:45:30.000000','21:50:34.000000','00:05:04.000000',14),('12:32:21.000000','12:34:20.000000','00:01:59.000000',10),('19:10:13.000000','19:55:20.000000','00:45:07.000000',10),('20:30:25.000000','21:21:20.000000','00:50:55.000000',10),('13:40:56.000000','14:34:20.000000','00:53:24.000000',10),('16:20:20.000000','18:21:20.000000','02:01:00.000000',10),('17:42:59.000000','18:21:20.000000','00:38:21.000000',11),('23:12:20.000000','23:33:45.000000','00:21:25.000000',11),('17:15:20.000000','17:50:20.000000','00:35:00.000000',11),('16:35:13.000000','16:59:59.000000','00:24:46.000000',10),('14:36:54.000000','14:40:23.000000','00:03:29.000000',12),('11:52:56.000000','12:21:20.000000','00:28:24.000000',12),('09:31:43.000000','10:21:28.000000','00:49:45.000000',13),('06:14:54.000000','06:57:56.000000','00:43:02.000000',13),('22:48:13.000000','23:21:13.000000','00:33:00.000000',19),('14:51:54.000000','14:59:23.000000','00:07:29.000000',17);
+INSERT INTO salary VALUES (27,'Devdip Sen',5,10000),(28,'Alpana Sharan',3,2500),(29,'Priyanka Singh',3,2500),(30,'Ranjani Iyer',2,5000),(31,'Amlan Bhuyan',4,7500),(32,'Manoj Prabhakar',1,1000),(33,'Raj Phadke',5,10000),(34,'Priya Yadav',1,1000),(35,'Sayali Joshi',4,7500),(36,'Pranav Patil',5,10000),(37,'Rohit Patil',3,2500),(38,'Swanand Sapre',5,10000);
+INSERT INTO simdata VALUES (1234567890123460,'Postpaid',2,19,3),(1234567890123461,'Prepaid',16,10,1),(1234567890123462,'Postpaid',14,12,3),(1234567890123463,'Postpaid',1,14,5),(1234567890123464,'Prepaid',12,16,8),(1234567890123465,'Postpaid',13,11,7),(1234567890123466,'Prepaid',15,13,9),(1234567890123467,'Postpaid',10,18,10),(1234567890123468,'Postpaid',7,15,4),(1234567890123469,'Prepaid',5,17,6);
+INSERT INTO tracking VALUES (1,'On the way',10),(2,'Arrived to courier service',9),(3,'Near by closest dispatch location',14),(4,'Arrived to courier service',16),(5,'Arrived to courier service',17),(6,'On the way',19),(7,'Near by dispatch location',7),(8,'Arriving Tomorrow',2),(9,'Arriving Today',13);
+INSERT INTO employeeworklocation VALUES (1,2),(2,4),(3,3),(4,1),(5,2),(6,4),(7,3),(8,1),(9,2),(10,4),(11,3),(12,1),(13,2),(14,4),(15,3),(16,1),(17,2),(18,4),(19,3),(20,1);
+
+
