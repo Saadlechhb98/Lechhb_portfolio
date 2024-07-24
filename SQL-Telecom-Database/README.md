@@ -9,3 +9,4 @@
 cette base de données contient des informations concernant le numéro de carte SIM, le numéro de téléphone, les enregistrements d'appels, la durée de l'appel. Elle fournit également des informations sur les forfaits sur lesquels le client est actuellement actif, la quantité de données qu'il a utilisée. Le support d'informations demandé par le client est via l'accès du vendeur. Le vendeur pourrait également être en mesure d'aider le client avec le statut de sa commande en cours ainsi que les informations de suivi.
 
 # ER Diagrame:
+![Capture d'écran 2024-07-24 132521](https://github.com/user-attachments/assets/2ddb3194-bf04-4eda-abe4-5933c9ba333c)
