@@ -1,0 +1,28 @@
+FROM apache/airflow:latest
+
+# Install dependencies
+USER root
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    apt-transport-https \
+    gnupg2 \
+    unixodbc-dev
+
+# Install the ODBC driver for SQL Server
+RUN wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/debian/10/prod buster main" > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql17
+
+# Switch to airflow user to install Python packages
+USER airflow
+
+RUN pip install markupsafe \
+    && pip install apache-airflow-providers-odbc \
+    && pip install pyodbc \
+    && pip install apache-airflow-providers-microsoft-mssql \
+    && pip install apache-airflow-providers-microsoft-mssql[odbc] \
+    && pip install apache-airflow-providers-microsoft-azure \
+    && pip install gitpython
