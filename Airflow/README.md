@@ -55,6 +55,8 @@ Ce script Airflow réalise un chargement incrémental de données depuis plusieu
 
   ![Capture d'écran 2024-07-23 153339](https://github.com/user-attachments/assets/c7263b7f-023e-448c-a6d9-3e44c83e1ee3)  ![Capture d'écran 2024-07-23 153744](https://github.com/user-attachments/assets/5481e897-f7c8-4cd4-81a9-2fa85c64fdba)
 
+- Etat final d'une table (echantillon)
+  
 # Script 2 : Chargement avec Slowly Changing Dimension (SCD) Type 2
 
 Ce script implémente un processus ETL utilisant la technique SCD Type 2 pour capturer l'historique des changements dans les données dimensionnelles.
