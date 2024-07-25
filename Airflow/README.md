@@ -56,6 +56,8 @@ Ce script Airflow réalise un chargement incrémental de données depuis plusieu
   ![Capture d'écran 2024-07-23 153339](https://github.com/user-attachments/assets/c7263b7f-023e-448c-a6d9-3e44c83e1ee3)  ![Capture d'écran 2024-07-23 153744](https://github.com/user-attachments/assets/5481e897-f7c8-4cd4-81a9-2fa85c64fdba)
 
 - Etat final d'une table (echantillon)
+  ![Capture d'écran 2024-07-25 165207](https://github.com/user-attachments/assets/097ce944-54dd-4458-98bc-5ee855f0f8d4)
+
   
 # Script 2 : Chargement avec Slowly Changing Dimension (SCD) Type 2
 
