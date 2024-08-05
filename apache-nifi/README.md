@@ -30,3 +30,50 @@ Columns to Return: List of columns to fetch (nid, sname, last_modified)
 Maximum-value Columns: last_modified
 Output Format: Avro
 ```
+3- UpdateRecord:
+UpdateRecord nous permet de modifier le contenu des enregistrements. Dans notre exemple avec la table product, nous mettons en majuscule la première lettre de attribue 'sname'. Pour la table 'trx', nous l'utilisons pour remplacer les valeurs NULL de attribue 'nOperationFee' par 0. Ce processeur est crucial pour le nettoyage des données.
+```sh
+Record Reader: AvroReader
+Record Writer: AvroRecordSetWriter
+Replacement Value Strategy: Record Path Value
+/sname: ${field.value:substring(0,1):toUpper()}${field.value:substring(1):toLower()}
+```
+4-LookupRecord:
+LookupRecord effectue une recherche dans la table de destination pour chaque enregistrement entrant, en utilisant la clé primaire < nid >. Il oriente ensuite l'enregistrement vers « matched » (s'il existe dans la destination) ou « unmatched » (s'il est nouveau). Cela nous permet de faire la différence entre les enregistrements qui doivent être insérés et ceux qui doivent modifiés.
+```sh
+Record Reader: AvroReader
+Record Writer: AvroRecordSetWriter
+Lookup Service: DBLookupService (configured to connect to the destination table)
+Result RecordPath: /matched
+Routing Strategy: Route to 'matched' or 'unmatched'
+User-Defined Properties: key: /nid
+```
+5- UpdateAttribute (pour les nouveau record - unmatched)
+
+6- UpdateAttribute (pour les données modifiées - matched)
+
+7- PutDatabaseRecord (pour INSERT):
+Ce processeur prend les enregistrements qui ne correspondent pas dans LookupRecord (nouveaux enregistrements) et les insère dans la table de destination. Le mappage de champs garantit que chaque champ de la source est correctement placé dans la colonne correspondante de la table de destination.
+```sh
+Record Reader: AvroReader
+Statement Type: INSERT
+Database Connection Pooling Service: Points to the destination database connection
+Table Name: Name of the destination table (product_dw)
+Field Mapping: Maps fields from the source to the destination (nid:/nid,sname:/sname,last_modified:/last_modified,dw_insert_date:/dw_insert_date,dw_update_date:/dw_update_date)
+```
+
+8- PutDatabaseRecord (for UPDATE)
+Ce processeur prend les enregistrements correspondant à LookupRecord (enregistrements existants) et les met à jour dans la table de destination. Le mappage de champs spécifie les champs à mettre à jour et le paramètre « Mettre à jour les clés » indiquant ainsi le champ à utiliser pour identifier l'enregistrement à mettre à jour.
+```sh
+Record Reader: AvroReader
+Statement Type: UPDATE
+Database Connection Pooling Service: Points to the destination database connection
+Table Name: Name of the destination table (product_dw)
+Field Mapping: Maps fields to be updated (sname:/sname,last_modified:/last_modified,dw_update_date:/dw_update_date)
+Update Keys: nid
+```
+Ces processeurs, lorsqu'ils sont connectés dans le bon ordre, forment un pipeline ETL complet. Ils extraient les données de la source, les transforment si nécessaire, déterminent si chaque enregistrement est nouveau ou existant, puis insèrent ou mettent à jour les enregistrements dans l'entrepôt de données de destination. Cette configuration garantit un chargement efficace et incrémentiel des données tout en préservant l'intégrité des données et en suivant les modifications au fil du temps.
+
+# Zoom sur application du processus sur chaque table
+a- table facturation
+
