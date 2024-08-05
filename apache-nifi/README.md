@@ -3,7 +3,7 @@ Ce projet vise à développer une solution robuste d'intégration et warehousing
 
 Le projet aborde plusieurs défis clés en matière d'intégration de données, notamment le chargement incrémentiel des données, la transformation des données et le maintien de la cohérence des données entre différents systèmes.
 
-Les données sources proviennent de diverses tables opérationnelles, chacune représentant différents aspects de l'entreprise, tels que les informations sur les produits, les détails de la boutique, les transactions financières et les recharges des clients, il s'agit du meme modèle utilisés dans le project Airflow.
+Les données sources proviennent de diverses tables opérationnelles, chacune représentant différents aspects de l'entreprise, tels que les informations sur les produits, les détails de shop, les transactions financières et les recharges des clients, il s'agit du meme modèle utilisés dans le project Airflow.
 
 NiFi est plus faisable que Airflow pour les projets ETL car il permet de créer des flux de données complexes sans écrire de code, grâce à son interface visuelle intuitive, contrairement à Airflow qui nécessite souvent des scripts Python pour définir les tâches et les workflows. De plus, NiFi offre des fonctionnalités intégrées pour la gestion des données en temps réel et le traitement des flux, simplifiant ainsi la synchronisation et la transformation des données.
 
@@ -75,5 +75,19 @@ Update Keys: nid
 Ces processeurs, lorsqu'ils sont connectés dans le bon ordre, forment un pipeline ETL complet. Ils extraient les données de la source, les transforment si nécessaire, déterminent si chaque enregistrement est nouveau ou existant, puis insèrent ou mettent à jour les enregistrements dans l'entrepôt de données de destination. Cette configuration garantit un chargement efficace et incrémentiel des données tout en préservant l'intégrité des données et en suivant les modifications au fil du temps.
 
 # Zoom sur application du processus sur chaque table
-a- table facturation
+- tables [facturation,shop,city,recharge,product,trx] - destination ( echantillon ):
+
+![Capture d'écran 2024-08-05 105650](https://github.com/user-attachments/assets/9437190e-108f-45f4-bd83-daa090b06821)
+
+![Capture d'écran 2024-08-05 110243](https://github.com/user-attachments/assets/448f4d68-6230-4f86-be48-c7a59b4aeb30)
+
+![Capture d'écran 2024-08-05 110312](https://github.com/user-attachments/assets/b5b8a3c8-280a-4c0e-b0b3-cfb5886f08c7)
+
+![Capture d'écran 2024-08-05 110326](https://github.com/user-attachments/assets/1d645b27-efad-4f98-bce2-94194f68782e)
+
+![Capture d'écran 2024-08-05 110352](https://github.com/user-attachments/assets/51a4228c-8324-4db3-96a3-37b25a765449)
+
+![Capture d'écran 2024-08-05 110435](https://github.com/user-attachments/assets/f1bd0cd8-7c8f-49ca-aaf6-ff09ec1d271b)
+
+On constate que les données ont été efficacement transférées de la base de données transactionnelle vers le data warehouse, plus précisément dans les tables de destination correspondantes. Ce processus d'ETL (Extract, Transform, Load) ne se limite pas à un transfert ponctuel, mais fonctionne de manière continue et en temps réel. Ainsi, chaque nouvelle donnée insérée dans la base transactionnelle est automatiquement capturée et transmise vers le data warehouse. De même, toute modification apportée aux données existantes dans la base transactionnelle est immédiatement reflétée dans le data warehouse. Cette synchronisation en temps réel assure que le data warehouse maintient constamment une image à jour et fidèle des données opérationnelles, permettant ainsi des analyses et des prises de décision basées sur les informations les plus récentes.
 
