@@ -17,8 +17,8 @@ Controller Service Type: DBCPConnectionPool
 Database Connection URL: jdbc:sqlserver://[source_server]:[port];databaseName=[source_db]
 Database Driver Class Name: com.microsoft.sqlserver.jdbc.SQLServerDriver
 Database Driver Location(s): [path to sqljdbc4.jar]
-Database User: [source_username]
-Password: [source_password]
+Database User: [sourcedb_username]
+Password: [sourcedb_password]
 ```
 2- QueryDatabaseTable:
 Ce processeur requette la table spécifiée dans la base de données source. Il utilise la colonne « last_modified » pour récupérer uniquement les enregistrements nouveaux ou mis à jour depuis la dernière exécution, mettant en œuvre une stratégie de chargement incrémentielle. Le paramètre « Maximum-value Columns » lui permet de suivre la dernière valeur « last_modified » traitée, garantissant ainsi que les exécutions suivantes récupèrent uniquement les données les plus récentes.
@@ -36,7 +36,8 @@ UpdateRecord nous permet de modifier le contenu des enregistrements. Dans notre 
 Record Reader: AvroReader
 Record Writer: AvroRecordSetWriter
 Replacement Value Strategy: Record Path Value
-/sname: ${field.value:substring(0,1):toUpper()}${field.value:substring(1):toLower()}
+/sname: ${field.value:substring(0,1):toUpper()}${field.value:substring(1):toLower()} # pour la table product ( on capitalise )
+/sname: ${field.value:isEmpty():ifElse('x', ${field.value})}  # pour la table trx (remplace les valeur null par 0)
 ```
 4-LookupRecord:
 LookupRecord effectue une recherche dans la table de destination pour chaque enregistrement entrant, en utilisant la clé primaire < nid >. Il oriente ensuite l'enregistrement vers « matched » (s'il existe dans la destination) ou « unmatched » (s'il est nouveau). Cela nous permet de faire la différence entre les enregistrements qui doivent être insérés et ceux qui doivent modifiés.
