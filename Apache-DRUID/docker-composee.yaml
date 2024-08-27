@@ -1,0 +1,169 @@
+version: '3.7'
+
+x-druid-env: &druid-env
+  POSTGRES_URL: jdbc:postgresql://postgres:5432/druid
+  POSTGRES_USERNAME: druid
+  POSTGRES_PASSWORD: druid_pass
+  ZOOKEEPER_SERVER: zookeeper:2181
+  DRUID_LOG4J: <?xml version="1.0" encoding="UTF-8"?><Configuration status="WARN"><Appenders><Console name="Console" target="SYSTEM_OUT"><PatternLayout pattern="%d{ISO8601} %p [%t] %c - %m%n"/></Console></Appenders><Loggers><Root level="info"><AppenderRef ref="Console"/></Root><Logger name="org.apache.druid.jetty.RequestLog" additivity="false" level="DEBUG"><AppenderRef ref="Console"/></Logger></Loggers></Configuration>
+  druid_extensions_loadList: '["druid-histogram", "druid-datasketches", "postgresql-metadata-storage"]'
+  druid_zk_service_host: zookeeper
+  druid_metadata_storage_type: postgresql
+  druid_metadata_storage_connector_connectURI: jdbc:postgresql://postgres:5432/druid
+  druid_metadata_storage_connector_user: druid
+  druid_metadata_storage_connector_password: druid_pass
+  druid_coordinator_balancer_strategy: cachingCost
+  druid_indexer_runner_javaOpts: "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager"
+  druid_indexer_fork_property_druid_processing_buffer_sizeBytes: "268435456"
+  druid_storage_type: local
+  druid_storage_storageDirectory: /opt/shared/segments
+  druid_indexer_logs_type: file
+  druid_indexer_logs_directory: /opt/shared/indexing-logs
+  druid_processing_numThreads: "2"
+  druid_processing_numMergeBuffers: "2"
+  DRUID_DEV_LOG_LEVEL: DEBUG
+
+services:
+  zookeeper:
+    image: zookeeper:3.5
+    ports:
+      - "2181:2181"
+    environment:
+      ZOO_MY_ID: 1
+    networks:
+      - druid-network
+
+  postgres:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: druid
+      POSTGRES_USER: druid
+      POSTGRES_PASSWORD: druid_pass
+    networks:
+      - druid-network
+
+  coordinator:
+    image: apache/druid:0.23.0
+    ports:
+      - "8081:8081"
+    volumes:
+      - druid_shared:/opt/shared
+      - coordinator_var:/opt/druid/var
+    depends_on: 
+      - zookeeper
+      - postgres
+    command:
+      - coordinator
+    environment:
+      <<: *druid-env
+    networks:
+      - druid-network
+
+  broker:
+    image: apache/druid:0.23.0
+    ports:
+      - "8082:8082"
+    volumes:
+      - broker_var:/opt/druid/var
+    depends_on: 
+      - zookeeper
+      - postgres
+      - coordinator
+    command:
+      - broker
+    environment:
+      <<: *druid-env
+    networks:
+      - druid-network
+
+  historical:
+    image: apache/druid:0.23.0
+    ports:
+      - "8083:8083"
+    volumes:
+      - druid_shared:/opt/shared
+      - historical_var:/opt/druid/var
+    depends_on: 
+      - zookeeper
+      - postgres
+      - coordinator
+    command:
+      - historical
+    environment:
+      <<: *druid-env
+    networks:
+      - druid-network
+
+  middlemanager:
+    image: apache/druid:0.23.0
+    ports:
+      - "8091:8091"
+    volumes:
+      - druid_shared:/opt/shared
+      - middle_var:/opt/druid/var
+    depends_on: 
+      - zookeeper
+      - postgres
+      - coordinator
+    command:
+      - middleManager
+    environment:
+      <<: *druid-env
+    networks:
+      - druid-network
+
+  router:
+    image: apache/druid:0.23.0
+    ports:
+      - "8888:8888"
+    volumes:
+      - router_var:/opt/druid/var
+    depends_on:
+      - zookeeper
+      - postgres
+      - coordinator
+    command:
+      - router
+    environment:
+      <<: *druid-env
+    networks:
+      - druid-network
+
+  nifi:
+    image: apache/nifi:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - NIFI_WEB_HTTP_PORT=8080
+    volumes:
+      - nifi_database_repository:/opt/nifi/nifi-current/database_repository
+      - nifi_flowfile_repository:/opt/nifi/nifi-current/flowfile_repository
+      - nifi_content_repository:/opt/nifi/nifi-current/content_repository
+      - nifi_provenance_repository:/opt/nifi/nifi-current/provenance_repository
+      - nifi_conf:/opt/nifi/nifi-current/conf
+      - nifi_state:/opt/nifi/nifi-current/state
+      - nifi_drivers:/opt/nifi/nifi-current/drivers
+      - ./druid-nifi/nifi-druid-nar-1.15.3.nar/nifi-druid-nar-1.15.3.nar:/opt/nifi/nifi-current/lib/nifi-druid-nar-1.15.3.nar
+    networks:
+      - druid-network
+
+volumes:
+  druid_shared:
+  coordinator_var:
+  broker_var:
+  historical_var:
+  middle_var:
+  router_var:
+  nifi_database_repository:
+  nifi_flowfile_repository:
+  nifi_content_repository:
+  nifi_provenance_repository:
+  nifi_conf:
+  nifi_state:
+  nifi_drivers:
+
+networks:
+  druid-network:
+    driver: bridge
