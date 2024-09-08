@@ -1,0 +1,105 @@
+SELECT 
+    t.nid AS transaction_id,
+    t.dInsertion AS transaction_date,
+    t.nAmount AS transaction_amount,
+    t.nOperationFee AS operation_fee,
+    p.sname AS product_name,
+    s.sname AS shop_name,
+    c.sname AS city_name,
+    f.nAmount AS facturation_amount,
+    f.dInsertion AS facturation_date
+FROM 
+    minio.transaction.transaction t
+LEFT JOIN 
+    minio.product.product p ON t.nProductId = p.nid
+LEFT JOIN 
+    minio.shop.shop s ON t.nShopId = s.nid
+LEFT JOIN 
+    minio.city.city c ON s.ncityid = c.nid
+LEFT JOIN 
+    minio.facturation.facturation f ON f.nShopId = t.nShopId
+WHERE 
+    t.nAmount IS NOT NULL
+    AND s.sname IS NOT NULL;
+-------------------------
+CREATE SCHEMA IF NOT EXISTS minio.transaction
+WITH (location = 's3a://datalake2/transaction/');
+
+CREATE TABLE IF NOT EXISTS minio.transaction.transaction (
+nid varchar,
+dInsertion varchar,
+nProductId varchar,
+nAmount varchar,
+nOperationFee varchar,
+nShopId varchar
+)
+WITH ( 
+    external_location = 's3a://datalake2/transaction/',
+    format = 'csv'
+);
+------
+CREATE SCHEMA IF NOT EXISTS minio.facturation
+WITH (location = 's3a://datalake2/facturation/');
+
+CREATE TABLE IF NOT EXISTS minio.facturation.facturation (
+    nid VARCHAR,
+    nShopId VARCHAR,
+    dInsertion VARCHAR,
+    sBillerId VARCHAR,
+    nAmount VARCHAR
+)
+WITH ( 
+    external_location = 's3a://datalake2/facturation/',
+    format = 'csv'
+);
+-----
+CREATE SCHEMA IF NOT EXISTS minio.city
+WITH (location = 's3a://datalake2/city/');
+
+CREATE TABLE IF NOT EXISTS minio.city.city (
+nid varchar,
+sname varchar
+)
+WITH ( 
+    external_location = 's3a://datalake2/city/',
+    format = 'csv'
+);
+-----
+CREATE SCHEMA IF NOT EXISTS minio.product
+WITH (location = 's3a://datalake2/product/');
+
+CREATE TABLE IF NOT EXISTS minio.product.product (
+nid varchar,
+sname varchar
+)
+WITH ( 
+    external_location = 's3a://datalake2/product/',
+    format = 'csv'
+);
+------
+CREATE SCHEMA IF NOT EXISTS minio.shop
+WITH (location = 's3a://datalake2/shop/');
+
+CREATE TABLE IF NOT EXISTS minio.shop.shop (
+nid varchar,
+sname varchar,
+ncityid varchar
+)
+WITH ( 
+    external_location = 's3a://datalake2/shop/',
+    format = 'csv'
+);
+-------
+CREATE SCHEMA IF NOT EXISTS minio.recharge
+WITH (location = 's3a://datalake2/recharge/');
+
+CREATE TABLE IF NOT EXISTS minio.recharge.recharge (
+nid varchar,
+nShopId varchar,
+dRecharge varchar,
+nAmount varchar
+)
+WITH ( 
+    external_location = 's3a://datalake2/recharge/',
+    format = 'csv'
+);
