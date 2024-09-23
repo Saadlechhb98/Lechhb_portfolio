@@ -5,7 +5,8 @@
 ## Objectif:
 
 L'objectif de ce projet est de crypter les données d'une table dans une base de données SQL Server, de les visualiser cryptées dans Power BI, mais de pouvoir les décrypter à l'aide d'un script Python sans se connecter où avoir une interaction avec SQL server. Cela permet de sécuriser les données sensibles tout en étant capable de les exploiter.
-C'est un dire on peut télecharger les données crypter sous format CSV, est executer script python pour les décrypter
+
+Autrement dit, on peut télécharger les données chiffrées sous format CSV et exécuter un script Python pour les déchiffrer. Le premier script Python est responsable d'extraire les données RIB de la base de données source et d'effectuer le chiffrement avec la méthode AES. Quant au deuxième script, il est chargé de lire le fichier CSV et de déchiffrer les données RIB vers un autre fichier CSV de sortie.
 
 ## Vue sur l’architecture : 
 On va utiliser SQL Server pour le stockage et le chiffrement, Power BI pour la visualisation des données chiffrées en varchar puisque de visualiser les données binaires sur power bi, Python pour le déchiffrement hors-ligne c’est-à-dire sans avoir une liaison avec SQL server.
